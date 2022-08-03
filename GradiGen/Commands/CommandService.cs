@@ -7,88 +7,132 @@ using System.Drawing;
 using System.Reflection;
 using Spectre.Console;
 using GradiGen.Enums;
+using System.Diagnostics;
 
 namespace GradiGen.Commands
 {
     /// <summary>
-    /// 
+    ///     Represents the handler for registered commands.
     /// </summary>
     public class CommandService
     {
-        private readonly IReadOnlyDictionary<string, ModuleInfo> _callback;
-
-        private readonly RunMode _level;
+        /// <summary>
+        ///     The range of registered commands.
+        /// </summary>
+        public Dictionary<string, CommandInfo> CommandMap { get; private set; }
 
         /// <summary>
-        /// 
+        ///     Represents the service container used to 
+        /// </summary>
+        public IServiceProvider? Services { get; }
+
+        /// <summary>
+        ///     Creates a new instance of the <see cref="CommandService"/> for the target assembly.
         /// </summary>
         /// <param name="assembly"></param>
-        public CommandService(Assembly assembly, RunMode level)
+        public CommandService(IServiceProvider services = null!)
         {
-            _level = level;
-            _callback = RegisterModules(assembly);
+            Services = services;
+            CommandMap = new();
         }
 
-        private IReadOnlyDictionary<string, ModuleInfo> RegisterModules(Assembly assembly)
+        /// <summary>
+        ///     Registers all commands in the provided assembly to the <see cref="CommandMap"/> for execution.
+        /// </summary>
+        /// <param name="assembly"></param>
+        /// <returns></returns>
+        public async Task RegisterCommandsAsync(Assembly assembly)
         {
             var types = assembly.GetTypes();
 
-            var interfaceType = typeof(ICommand);
-
-            var callback = new Dictionary<string, ModuleInfo>();
+            var baseType = typeof(ICommandBase);
 
             foreach (var type in types)
+                if (baseType.IsAssignableFrom(type) && !type.IsAbstract)
+                    await RegisterInternalAsync(type);    
+        }
+
+        private async Task RegisterInternalAsync(Type type)
+        {
+            await Task.CompletedTask;
+
+            Debugger.Message($"Found type: {type.FullName}");
+
+            var method = type.GetMethod("ExecuteAsync");
+
+            if (method is null)
+                throw new InvalidOperationException($"An unexpected error has occurred while trying to find execution method of type {type.FullName}.");
+
+            var ctor = type.GetConstructors().First();
+
+            if (ctor is null)
+                throw new InvalidOperationException($"An unexpected error has occurred while trying to find primary constructor of type {type.FullName}");
+
+            var attr = type.GetCustomAttributes(false);
+
+            foreach (var a in attr)
             {
-                if (interfaceType.IsAssignableFrom(type) && !type.IsAbstract)
+                if (a is not CommandAttribute cmd)
+                    continue;
+
+                var commandInfo = new CommandInfo(ctor, method, type, attr, cmd.Name, cmd.Description);
+
+                if (attr.Where(x => x is AliasesAttribute).FirstOrDefault() is AliasesAttribute ali)
                 {
-                    var executionMethod = type.GetMethod("ExecuteAsync");
-
-                    if (executionMethod is null)
-                        throw new InvalidOperationException($"An unexpected error has occurred while trying to find execution method of type {type.FullName}.");
-
-                    var primaryCtor = type.GetConstructors().First();
-
-                    if (primaryCtor is null)
-                        throw new InvalidOperationException($"An unexpected error has occurred while trying to find primary constructor of type {type.FullName}");
-
-                    foreach (var attr in type.GetCustomAttributes(false))
+                    string[]? aliases = ali.Aliases;
+                    foreach (var alias in aliases)
                     {
-                        if (attr is CommandAttribute cmd)
-                        {
-                            if (_level is RunMode.Debug)
-                                AnsiConsole.WriteLine($"Succesfully registered {cmd.Name} with {executionMethod.Name} && {primaryCtor.Name} as members.");
-                            callback.Add(cmd.Name, new ModuleInfo(primaryCtor, executionMethod));
-                        }
+                        Debugger.Message($"Succesfully registered {alias} for {cmd.Name} with {method.Name} & {ctor.Name} as members.");
+                        CommandMap.Add(alias, commandInfo);
                     }
                 }
-            }
 
-            return callback;
+                Debugger.Message($"Succesfully registered {cmd.Name} with {method.Name} && {ctor.Name} as members.");
+
+                CommandMap.Add(cmd.Name, commandInfo);
+            }
         }
 
         /// <summary>
-        /// 
+        ///     Executes the found command with the provided context.
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="commandContext"></param>
         /// <param name="provider"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task<bool> ExecuteCommandAsync(CommandContext context, IServiceProvider? provider = null)
+        public async Task<bool> ExecuteCommandAsync<T>(T commandContext, IServiceProvider? provider = null) where T : ICommandContext
         {
-            if (_callback.TryGetValue(context.Name, out var value))
+            if (CommandMap.TryGetValue(commandContext.Name, out var info))
             {
-                var instance = value.Constructor.Invoke(null);
+                var obj = info.Constructor.Invoke(null);
+                Debugger.Message($"Succesfully created scope for {info.Type.FullName}.");
 
-                var result = value.Method.Invoke(instance, new[] { context });
+                if (obj is not CommandBase<T> module)
+                    throw new InvalidOperationException("Failed to cast instance to module.");
 
-                if (result is not Task t)
-                    throw new InvalidOperationException("Unexpected return type received from executing command.");
+                await ExecuteInternalAsync(commandContext, module, info);
 
-                await t;
-                AnsiConsole.WriteLine();
                 return true;
             }
+            Debugger.Message($"Failed to find command with name: {commandContext.Name}");
             return false;
+        }
+
+        private async Task ExecuteInternalAsync<T>(T context, CommandBase<T> module, CommandInfo info) where T : ICommandContext
+        {
+            module.SetContext(context);
+            module.SetInformation(info);
+
+            var stopwatch = Stopwatch.StartNew();
+
+            await module.BeforeExecuteAsync(info, context);
+
+            await module.ExecuteAsync();
+
+            await module.AfterExecuteAsync(info, context);
+
+            stopwatch.Stop();
+            Debugger.Message($"Succesfully executed {info.Name} in {stopwatch.ElapsedTicks} ticks.");
         }
     }
 }

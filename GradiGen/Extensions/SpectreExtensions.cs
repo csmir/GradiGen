@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using GradiGen.Colors;
+using Spectre.Console;
 using Spectre.Console.Rendering;
 using System;
 using System.Collections.Generic;
@@ -44,10 +45,8 @@ namespace GradiGen.Extensions
         /// </summary>
         /// <param name="color"></param>
         /// <returns></returns>
-        public static IRenderable RenderCodes(this Color color)
+        public static IRenderable RenderCodes(this IntegrityColor color)
         {
-            string hexValue = $"{color.R:X2}{color.G:X2}{color.B:X2}";
-            uint uintValue = Convert.ToUInt32(hexValue, 16);
             return new Table()
                 .HideHeaders()
                 .NoBorder()
@@ -56,13 +55,13 @@ namespace GradiGen.Extensions
                 .AddColumn("Value")
                 .AddRow(
                     new Markup("RGB"),
-                    new Markup($"{color.R}, {color.G}, {color.B}"))
+                    new Markup(color.ToString(ColorType.RGB)))
                 .AddRow(
                     new Markup("Hex"),
-                    new Markup($"#{color.R:X2}{color.G:X2}{color.B:X2}"))
+                    new Markup(color.ToString(ColorType.Hex)))
                 .AddRow(
                     new Markup("UInt32"),
-                    new Markup($"{uintValue}"));
+                    new Markup(color.ToString(ColorType.UInt32)));
         }
     }
 }

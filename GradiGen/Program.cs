@@ -1,4 +1,5 @@
-﻿using GradiGen.Commands;
+﻿using GradiGen;
+using GradiGen.Commands;
 using GradiGen.Enums;
 using GradiGen.Extensions;
 using Spectre.Console;
@@ -13,7 +14,9 @@ var logLevel = AnsiConsole.Prompt(
         .Title("What mode are you launching the application in?")
         .AddChoices(Enum.GetValues<RunMode>()));
 
-var manager = new CommandService(typeof(Program).Assembly, logLevel);
+Debugger.IsDebugEnabled = logLevel is RunMode.Debug;
+
+var manager = new CommandService();
 
 bool restart = true;
 while (restart)
@@ -23,8 +26,9 @@ while (restart)
     if (string.IsNullOrEmpty(input))
         continue;
 
-    var command = CommandContext.Parse(input);
-
-    if (!await manager.ExecuteCommandAsync(command))
-        restart = false;
+    if (CommandContext.TryParse(input, out var context))
+    {
+        if (!await manager.ExecuteCommandAsync(context))
+            AnsiConsole.MarkupLine("[red]Invalid command![/].");
+    }
 }

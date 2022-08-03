@@ -7,18 +7,18 @@ using System.Threading.Tasks;
 namespace GradiGen.Commands
 {
     /// <summary>
-    /// 
+    ///     Represents the required info to map a command.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class CommandAttribute : Attribute
     {
         /// <summary>
-        /// 
+        ///     The command name.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// 
+        ///     The command description.
         /// </summary>
         public string Description { get; }
 

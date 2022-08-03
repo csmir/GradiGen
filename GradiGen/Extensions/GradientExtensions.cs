@@ -1,10 +1,11 @@
-﻿using GradiGen.Enums;
-using GradiGen.Formatting;
+﻿using GradiGen.Formatting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
+using GradiGen.Colors;
 
 namespace GradiGen.Extensions
 {
@@ -20,7 +21,7 @@ namespace GradiGen.Extensions
         /// <param name="final"></param>
         /// <param name="steps"></param>
         /// <returns></returns>
-        public static IEnumerable<System.Drawing.Color> GenerateGradient(this System.Drawing.Color initial, System.Drawing.Color final, int steps)
+        public static IEnumerable<Color> GenerateGradient(this Color initial, Color final, int steps)
         {
             var (rMin, gMin, bMin) = (initial.R, initial.G, initial.B);
             var (rMax, gMax, bMax) = (final.R, final.G, final.B);
@@ -31,7 +32,7 @@ namespace GradiGen.Extensions
                 var gAverage = gMin + (gMax - gMin) * i / steps;
                 var bAverage = bMin + (bMax - bMin) * i / steps;
 
-                yield return System.Drawing.Color.FromArgb(rAverage, gAverage, bAverage);
+                yield return Color.FromArgb(rAverage, gAverage, bAverage);
             }
         }
 
@@ -43,7 +44,7 @@ namespace GradiGen.Extensions
         /// <param name="type"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public static IEnumerable<IFormatted> FormatGradient(this IEnumerable<System.Drawing.Color> input, string textToFormat, FormatType type)
+        public static IEnumerable<IFormatted> FormatGradient(this IEnumerable<Color> input, string textToFormat, FormatType type)
         {
             var array = input.ToArray();
 
@@ -59,6 +60,9 @@ namespace GradiGen.Extensions
                             break;
                         case FormatType.ScrapMechanic:
                             yield return new ScrapMechanicFormatted(array[i], "N/A", true);
+                            break;
+                        case FormatType.Tgg:
+                            yield return new TggFormatted(array[i], "N/A", true);
                             break;
                     }
 
@@ -80,6 +84,9 @@ namespace GradiGen.Extensions
                             break;
                         case FormatType.ScrapMechanic:
                             yield return new ScrapMechanicFormatted(array[i - 1], characters, false);
+                            break;
+                        case FormatType.Tgg:
+                            yield return new TggFormatted(array[i - 1], characters, false);
                             break;
                         default:
                             throw new NotSupportedException();

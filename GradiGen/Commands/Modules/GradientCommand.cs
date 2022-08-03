@@ -1,5 +1,7 @@
-﻿using GradiGen.Enums;
+﻿using GradiGen.Colors;
+using GradiGen.Enums;
 using GradiGen.Extensions;
+using GradiGen.Formatting;
 using Spectre.Console;
 using System;
 using System.Collections.Generic;
@@ -11,9 +13,10 @@ using System.Threading.Tasks;
 namespace GradiGen.Commands.Modules
 {
     [Command("gradient", "generates a gradient")]
-    public class GradientCommand : ICommand
+    [Aliases("grad", "g")]
+    public class GradientCommand : CommandBase<CommandContext>
     {
-        public async Task ExecuteAsync(CommandContext context)
+        public override async Task ExecuteAsync()
         {
             await Task.CompletedTask;
             var type = AnsiConsole.Prompt(
@@ -33,7 +36,7 @@ namespace GradiGen.Commands.Modules
             };
             
             var input = AnsiConsole.Prompt<string>(
-                new TextPrompt<string>("[grey]Formatting Text (Leave empty if none): [/]")
+                new TextPrompt<string>("[grey]Formatting Text (Leave empty if none):[/]")
                     .Validate(x => x.Length is > 2 or 0)
                     .ValidationErrorMessage("[red]Input text needs to be 0 or more than 2 characters long.[/]")
                     .AllowEmpty());

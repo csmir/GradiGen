@@ -7,7 +7,10 @@ using System.Threading.Tasks;
 
 namespace GradiGen.Commands
 {
-    public class CommandContext
+    /// <summary>
+    ///     Represents a class thats used to describe data from the command.
+    /// </summary>
+    public class CommandContext : ICommandContext
     {
         /// <summary>
         ///     The name of the command.
@@ -32,39 +35,11 @@ namespace GradiGen.Commands
         }
 
         /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="input"></param>
-        /// <param name="color"></param>
-        public void Respond(object input, Color? color = null)
-        {
-            SetOutputColor(color);
-            AnsiConsole.WriteLine($"{input.ToString()}");
-            ResetOutputColor();
-        }
-
-        /// <summary>
-        ///     Resets the command output color.
-        /// </summary>
-        public void ResetOutputColor()
-            => AnsiConsole.Foreground = Color.White;
-
-        /// <summary>
-        ///     Sets the command output color.
-        /// </summary>
-        /// <param name="color"></param>
-        public void SetOutputColor(Color? color)
-        {
-            if (color != null)
-                AnsiConsole.Foreground = color.Value;
-        }
-
-        /// <summary>
-        /// 
+        ///     Attempts to parse the command input to a valid range of values.
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static CommandContext Parse(string input)
+        public static bool TryParse(string input, out CommandContext context)
         {
             var range = input.Split(' ');
 
@@ -107,7 +82,8 @@ namespace GradiGen.Commands
                 commandParams.Add(entry);
             }
 
-            return new(commandName, input, commandParams);
+            context = new(commandName, input, commandParams);
+            return true;
         }
     }
 }
