@@ -28,6 +28,7 @@ namespace GradiGen.App
         /// </summary>
         public static void Start()
         {
+            //AnsiConsole.Record();
             System = Environment.OSVersion.Platform switch
             {
                 PlatformID.Unix => SystemEnvironment.Unix,

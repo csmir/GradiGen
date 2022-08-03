@@ -90,13 +90,27 @@ namespace GradiGen.App.Commands
 
             AnsiConsole.Write(table);
 
-            if (AnsiConsole.Confirm("[grey]Do you want to copy your format to the system clipboard?[/]"))
+            if (Lifetime.System is SystemEnvironment.Windows)
             {
-                Clipboard.SetText(string.Join("", formatted.Select(x => x.Value)));
-                AnsiConsole.MarkupLine("[grey]Succesfully copied gradient to clipboard.[/]");
+                if (AnsiConsole.Confirm("[grey]Do you want to copy your format to the system clipboard?[/]"))
+                {
+                    Clipboard.SetText(string.Join("", formatted.Select(x => x.Value)));
+                    AnsiConsole.MarkupLine("[grey]Copied gradient to clipboard.[/]");
+                }
+                else
+                    AnsiConsole.MarkupLine("[grey]Skipped copying to clipboard.[/]");
             }
             else
-                AnsiConsole.MarkupLine("[grey]Skipped copying to clipboard.[/]");
+            {
+                AnsiConsole.MarkupLine("[grey]Your system does not support copying to clipboard from this application.[/]");
+                if (AnsiConsole.Confirm("[grey]Do you want to visualize the format in a message instead?"))
+                {
+                    AnsiConsole.WriteLine(string.Join("", formatted.Select(x => x.Value)));
+                    AnsiConsole.MarkupLine("[grey]Pasted gradient in console.[/]");
+                }
+                else
+                    AnsiConsole.MarkupLine("[grey]Skipped pasting to console.[/]");
+            }
         }
 
         #region hex

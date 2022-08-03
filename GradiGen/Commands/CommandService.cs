@@ -74,12 +74,12 @@ namespace GradiGen.Commands
                     string[]? aliases = ali.Aliases;
                     foreach (var alias in aliases)
                     {
-                        Debugger.Message($"Succesfully registered {alias} for {cmd.Name} with {method.Name} & {ctor.Name} as members.");
+                        Debugger.Message($"Registered {alias} for {cmd.Name}.");
                         CommandMap.Add(alias, commandInfo);
                     }
                 }
 
-                Debugger.Message($"Succesfully registered {cmd.Name} with {method.Name} && {ctor.Name} as members.");
+                Debugger.Message($"Registered {cmd.Name}.");
 
                 CommandMap.Add(cmd.Name, commandInfo);
             }
@@ -98,7 +98,7 @@ namespace GradiGen.Commands
             {
                 var obj = info.Constructor.Invoke(null);
 
-                Debugger.Message($"Succesfully created scope for {info.Type.FullName}.");
+                Debugger.Message($"Created scope for {info.Type.FullName}.");
 
                 if (obj is not CommandBase<T> module)
                     return ModuleResult.FromError($"Failed to interpret module type with matching type of {nameof(CommandBase<T>)}");
@@ -133,7 +133,7 @@ namespace GradiGen.Commands
             await module.AfterExecuteAsync(info, context);
 
             stopwatch.Stop();
-            Debugger.Message($"Succesfully executed {info.Name} in {stopwatch.ElapsedTicks} ticks.");
+            Debugger.Message($"Executed {info.Name} in {stopwatch.ElapsedTicks} ticks.");
         }
     }
 }
