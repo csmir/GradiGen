@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using GradiGen.Colors;
+﻿using GradiGen.Colors;
+using GradiGen.Commands;
 using GradiGen.Extensions;
 using Spectre.Console;
 
-namespace GradiGen.Commands.Modules
+namespace GradiGen.App.Commands
 {
     [Command("color-info", "Gets detailed information about a color.")]
     [Parameter("color", "The color to be informed about.")]
@@ -57,7 +53,7 @@ namespace GradiGen.Commands.Modules
                     var sortedColors = Spectrum.GetSortedSpectrum();
 
                     var range = sortedColors.GetWrappedRange(result, 5).ToArray();
-                    
+
                     foreach (var item in range)
                     {
                         var style = new Style(item.Color.ToSpectreColor());

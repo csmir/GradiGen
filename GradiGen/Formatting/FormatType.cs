@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GradiGen.Formatting
+﻿namespace GradiGen.Formatting
 {
     /// <summary>
     ///     Represents the format target to use when applying gradients to text.

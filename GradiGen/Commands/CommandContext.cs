@@ -1,30 +1,14 @@
-﻿using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GradiGen.Commands
+﻿namespace GradiGen.Commands
 {
     /// <summary>
     ///     Represents a class thats used to describe data from the command.
     /// </summary>
     public class CommandContext : ICommandContext
     {
-        /// <summary>
-        ///     The name of the command.
-        /// </summary>
         public string Name { get; }
 
-        /// <summary>
-        ///     The raw input of the command.
-        /// </summary>
         public string RawInput { get; }
 
-        /// <summary>
-        ///     The command parameters.
-        /// </summary>
         public List<string> Parameters { get; }
 
         private CommandContext(string name, string rawInput, List<string> parameters)
@@ -35,13 +19,13 @@ namespace GradiGen.Commands
         }
 
         /// <summary>
-        ///     Attempts to parse the command input to a valid range of values.
+        ///     Creates a new <see cref="CommandContext"/> from the input provider.
         /// </summary>
-        /// <param name="input"></param>
+        /// <param name="command"></param>
         /// <returns></returns>
-        public static bool TryParse(string input, out CommandContext context)
+        public static CommandContext Create(string command)
         {
-            var range = input.Split(' ');
+            var range = command.Split(' ');
 
             string commandName = string.Empty;
 
@@ -82,8 +66,7 @@ namespace GradiGen.Commands
                 commandParams.Add(entry);
             }
 
-            context = new(commandName, input, commandParams);
-            return true;
+            return new(commandName, command, commandParams);
         }
     }
 }

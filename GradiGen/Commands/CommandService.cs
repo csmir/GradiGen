@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
+﻿using System.Diagnostics;
 using System.Reflection;
-using Spectre.Console;
-using GradiGen.Enums;
-using System.Diagnostics;
 
 namespace GradiGen.Commands
 {
@@ -49,7 +41,7 @@ namespace GradiGen.Commands
 
             foreach (var type in types)
                 if (baseType.IsAssignableFrom(type) && !type.IsAbstract)
-                    await RegisterInternalAsync(type);    
+                    await RegisterInternalAsync(type);
         }
 
         private async Task RegisterInternalAsync(Type type)
@@ -100,22 +92,30 @@ namespace GradiGen.Commands
         /// <param name="provider"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task<bool> ExecuteCommandAsync<T>(T commandContext, IServiceProvider? provider = null) where T : ICommandContext
+        public async Task<IResult> ExecuteCommandAsync<T>(T commandContext) where T : ICommandContext
         {
             if (CommandMap.TryGetValue(commandContext.Name, out var info))
             {
                 var obj = info.Constructor.Invoke(null);
+
                 Debugger.Message($"Succesfully created scope for {info.Type.FullName}.");
 
                 if (obj is not CommandBase<T> module)
-                    throw new InvalidOperationException("Failed to cast instance to module.");
+                    return ModuleResult.FromError($"Failed to interpret module type with matching type of {nameof(CommandBase<T>)}");
 
-                await ExecuteInternalAsync(commandContext, module, info);
+                try
+                {
+                    await ExecuteInternalAsync(commandContext, module, info);
+                }
+                catch (Exception ex)
+                {
+                    return CommandResult.FromError(ex.Message, ex);
+                }
 
-                return true;
+                return CommandResult.FromSuccess();
             }
-            Debugger.Message($"Failed to find command with name: {commandContext.Name}");
-            return false;
+
+            return SearchResult.FromError($"Failed to find command with name: {commandContext.Name}");
         }
 
         private async Task ExecuteInternalAsync<T>(T context, CommandBase<T> module, CommandInfo info) where T : ICommandContext

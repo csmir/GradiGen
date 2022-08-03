@@ -1,7 +1,6 @@
 ﻿using GradiGen;
 using GradiGen.Commands;
 using GradiGen.Enums;
-using GradiGen.Extensions;
 using Spectre.Console;
 
 AnsiConsole.Write(
@@ -18,17 +17,31 @@ Debugger.IsDebugEnabled = logLevel is RunMode.Debug;
 
 var manager = new CommandService();
 
+await manager.RegisterCommandsAsync(typeof(Program).Assembly);
+
 bool restart = true;
+
 while (restart)
 {
-    var input = AnsiConsole.Ask<string>("Command: ([red]'help'[/] for more info)");
+    var command = AnsiConsole.Ask<string>("Command: ([red]'help'[/] for more info)");
 
-    if (string.IsNullOrEmpty(input))
+    if (string.IsNullOrEmpty(command))
         continue;
 
-    if (CommandContext.TryParse(input, out var context))
+    var ctx = CommandContext.Create(command);
+
+    var result = await manager.ExecuteCommandAsync(ctx);
+
+    if (!result.IsSuccess)
     {
-        if (!await manager.ExecuteCommandAsync(context))
+        if (result is SearchResult search)
             AnsiConsole.MarkupLine("[red]Invalid command![/].");
+
+        else if (result.Exception is not null)
+        {
+            AnsiConsole.WriteException(result.Exception);
+            if (Debugger.IsDebugEnabled)
+                restart = false;
+        }
     }
 }

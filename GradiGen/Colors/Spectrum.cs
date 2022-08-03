@@ -1,11 +1,4 @@
-﻿using Spectre.Console;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 
 namespace GradiGen.Colors
 {
@@ -18,7 +11,6 @@ namespace GradiGen.Colors
 
         private Spectrum(List<IntegrityColor> colors)
         {
-            AnsiConsole.WriteLine($"[Debug] created spectrum: {colors.Count}.");
             Items = colors.OrderByDescending(x => x, new ColorComparer()).ToList();
         }
 
@@ -39,7 +31,7 @@ namespace GradiGen.Colors
             while ((matchIndex - wrapAround) < 0)
                 matchIndex++;
 
-            for (int i = matchIndex - wrapAround; i < matchIndex + wrapAround;i++)
+            for (int i = matchIndex - wrapAround; i < matchIndex + wrapAround; i++)
             {
                 yield return Items[i];
             }
@@ -79,8 +71,6 @@ namespace GradiGen.Colors
 
             foreach (var name in names)
                 colors.Add(System.Drawing.Color.FromName(name));
-
-            AnsiConsole.WriteLine($"[Debug] Added named entries: {colors.Count}");
 
             return new(colors);
         }

@@ -1,14 +1,9 @@
-﻿using GradiGen.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GradiGen.Colors;
+using GradiGen.Commands;
+using GradiGen.Extensions;
 using Spectre.Console;
-using GradiGen.Colors;
 
-namespace GradiGen.Commands.Modules
+namespace GradiGen.App.Commands
 {
     [Command("color-list", "Displays the full list of available console colors.")]
     [Aliases("c-list", "colors", "clist")]

@@ -1,13 +1,6 @@
-﻿using GradiGen.Colors;
-using GradiGen.Extensions;
-using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GradiGen.Commands;
 
-namespace GradiGen.Commands.Modules
+namespace GradiGen.App.Commands
 {
     [Command("debug", "Debugging command")]
     [Aliases("d")]

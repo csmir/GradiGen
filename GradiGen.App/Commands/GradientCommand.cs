@@ -1,16 +1,12 @@
 ﻿using GradiGen.Colors;
+using GradiGen.Commands;
 using GradiGen.Enums;
 using GradiGen.Extensions;
 using GradiGen.Formatting;
 using Spectre.Console;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace GradiGen.Commands.Modules
+namespace GradiGen.App.Commands
 {
     [Command("gradient", "generates a gradient")]
     [Aliases("grad", "g")]
@@ -34,7 +30,7 @@ namespace GradiGen.Commands.Modules
                 ColorType.UInt32 => UInt32Generation(),
                 _ => throw new NotImplementedException()
             };
-            
+
             var input = AnsiConsole.Prompt<string>(
                 new TextPrompt<string>("[grey]Formatting Text (Leave empty if none):[/]")
                     .Validate(x => x.Length is > 2 or 0)
@@ -171,7 +167,7 @@ namespace GradiGen.Commands.Modules
             }
 
             var prompt = new TextPrompt<string>("[grey]Please specify a RGB color (xxx,xxx,xxx).[/]")
-                .Validate(x => 
+                .Validate(x =>
                 {
                     var input = x.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
                     if (input.Length is 3)
@@ -199,7 +195,7 @@ namespace GradiGen.Commands.Modules
 
         #region named
         private (System.Drawing.Color, System.Drawing.Color) NameGeneration()
-        { 
+        {
             var approach = AnsiConsole.Prompt(new SelectionPrompt<GenerationApproach>()
                 .Title("[grey]What generation approach do you want to use?[/]")
                 .AddChoices(Enum.GetValues<GenerationApproach>()));
