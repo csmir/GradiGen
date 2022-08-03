@@ -1,5 +1,7 @@
 # GradiGen - An efficient gradient generator.
 
+![image](https://user-images.githubusercontent.com/68127614/182712769-123a0e67-fac2-4dca-a9b1-4ab737b4c2e7.png)
+
 A .NET console application created for creating gradients without too much effort.
 
 > ⚒️ Uses [Spectre.Console](https://github.com/spectreconsole/Spectre.Console) to beautify the application!
