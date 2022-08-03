@@ -63,11 +63,11 @@ namespace GradiGen.App.Commands
                 formatValues = formatValues.Where(x => x is not FormatType.None).ToArray();
 
             var formatType = AnsiConsole.Prompt(
-                new SelectionPrompt<FormatType>()
+                new SelectionPrompt<string>()
                     .Title("[grey]What format do you want to use?[/]")
-                    .AddChoices(formatValues));
+                    .AddChoices(formatValues.Select(x => x.ToString()).Concat(Formatter.GetFormatNames())));
 
-            var formatted = gradient.FormatGradient(input!, formatType);
+            var formatted = gradient.Format(input!, formatType);
 
             var table = new Table()
                 .Title($"Generated gradient from {result.Item1.Name} to {result.Item2.Name}:")
@@ -100,9 +100,9 @@ namespace GradiGen.App.Commands
         }
 
         #region hex
-        private (System.Drawing.Color, System.Drawing.Color) HexGeneration()
+        private static (System.Drawing.Color, System.Drawing.Color) HexGeneration()
         {
-            System.Drawing.Color GetColor(TextPrompt<string> prompt)
+            static System.Drawing.Color GetColor(TextPrompt<string> prompt)
             {
                 var hex = AnsiConsole.Prompt<string>(prompt).Replace("#", "");
 
@@ -137,9 +137,9 @@ namespace GradiGen.App.Commands
         #endregion
 
         #region uint
-        private (System.Drawing.Color, System.Drawing.Color) UInt32Generation()
+        private static (System.Drawing.Color, System.Drawing.Color) UInt32Generation()
         {
-            System.Drawing.Color GetColor(TextPrompt<uint> prompt)
+            static System.Drawing.Color GetColor(TextPrompt<uint> prompt)
             {
                 var hex = AnsiConsole.Prompt<uint>(prompt);
                 return System.Drawing.Color.FromArgb((int)hex);
@@ -156,9 +156,9 @@ namespace GradiGen.App.Commands
         #endregion
 
         #region rgb
-        private (System.Drawing.Color, System.Drawing.Color) RGBGeneration()
+        private static (System.Drawing.Color, System.Drawing.Color) RGBGeneration()
         {
-            System.Drawing.Color GetColor(TextPrompt<string> prompt)
+            static System.Drawing.Color GetColor(TextPrompt<string> prompt)
             {
                 var rgb = AnsiConsole.Prompt<string>(prompt);
 
@@ -194,7 +194,7 @@ namespace GradiGen.App.Commands
         #endregion
 
         #region named
-        private (System.Drawing.Color, System.Drawing.Color) NameGeneration()
+        private static (System.Drawing.Color, System.Drawing.Color) NameGeneration()
         {
             var approach = AnsiConsole.Prompt(new SelectionPrompt<GenerationApproach>()
                 .Title("[grey]What generation approach do you want to use?[/]")

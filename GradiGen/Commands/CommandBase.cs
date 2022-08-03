@@ -14,11 +14,18 @@
             => Context = context;
 
         /// <summary>
-        ///     
+        ///     Displays all information about the command thats currently in scope.
         /// </summary>
         public CommandInfo CommandInfo { get; private set; } = default!;
         internal void SetInformation(CommandInfo info)
             => CommandInfo = info;
+
+        /// <summary>
+        ///     The command service used to execute this command.
+        /// </summary>
+        public CommandService Service { get; private set; } = default!;
+        internal void SetService(CommandService service)
+            => Service = service;
 
         /// <summary>
         /// 

@@ -9,7 +9,7 @@ namespace GradiGen.App.Commands
         public override async Task ExecuteAsync()
         {
             await Task.CompletedTask;
-            Environment.Exit(0);
+            Lifetime.Stop();
         }
     }
 }

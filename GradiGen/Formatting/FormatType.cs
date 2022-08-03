@@ -16,11 +16,6 @@
         ScrapMechanic,
 
         /// <summary>
-        ///     The TGG server color format.
-        /// </summary>
-        Tgg,
-
-        /// <summary>
         ///     No formatting mode.
         /// </summary>
         None,

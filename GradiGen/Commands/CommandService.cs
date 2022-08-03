@@ -122,6 +122,7 @@ namespace GradiGen.Commands
         {
             module.SetContext(context);
             module.SetInformation(info);
+            module.SetService(this);
 
             var stopwatch = Stopwatch.StartNew();
 

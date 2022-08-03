@@ -2,28 +2,17 @@
 using GradiGen.Commands;
 using GradiGen.Enums;
 using Spectre.Console;
+using GradiGen.App;
 
-AnsiConsole.Write(
-    new FigletText("GradiGen by Rozen")
-        .Centered()
-        .Color(Color.Purple));
-
-var logLevel = AnsiConsole.Prompt(
-    new SelectionPrompt<RunMode>()
-        .Title("What mode are you launching the application in?")
-        .AddChoices(Enum.GetValues<RunMode>()));
-
-Debugger.IsDebugEnabled = logLevel is RunMode.Debug;
+Lifetime.Start();
 
 var manager = new CommandService();
 
 await manager.RegisterCommandsAsync(typeof(Program).Assembly);
 
-bool restart = true;
-
-while (restart)
+while (Lifetime.IsRunning)
 {
-    var command = AnsiConsole.Ask<string>("Command: ([red]'help'[/] for more info)");
+    var command = AnsiConsole.Ask<string>("[grey]Command: ([/][orange1]'help'[/] [grey]for more info)[/]");
 
     if (string.IsNullOrEmpty(command))
         continue;
@@ -35,13 +24,13 @@ while (restart)
     if (!result.IsSuccess)
     {
         if (result is SearchResult search)
-            AnsiConsole.MarkupLine("[red]Invalid command![/].");
+            AnsiConsole.MarkupLine($"[red]Invalid command! {search.Message}[/].");
 
         else if (result.Exception is not null)
         {
             AnsiConsole.WriteException(result.Exception);
             if (Debugger.IsDebugEnabled)
-                restart = false;
+                Lifetime.Stop();
         }
     }
 }
