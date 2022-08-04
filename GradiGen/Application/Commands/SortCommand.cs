@@ -12,72 +12,114 @@ namespace GradiGen.Application.Commands
 {
     [Command("sort", "Sorts a range of self-defined colors.")]
     [Aliases("s")]
+    [Parameter("path", "A predefined file path with a range of colors.", false)]
     public class SortCommand : CommandBase<CommandContext>
     {
         public override async Task ExecuteAsync()
         {
-            bool ready = false;
             List<IntegrityColor> colors = new();
-            while (!ready)
+            bool fromFile = Context.Parameters.Count is 1;
+
+            if (fromFile)
             {
-                var value = AnsiConsole.Prompt(new TextPrompt<string>("[grey]Please define a color to sort. (Leave empty to continue)[/]")
-                    .AllowEmpty());
-
-                if (string.IsNullOrEmpty(value))
+                if (!File.Exists(Context.Parameters[0]))
                 {
-                    if (colors.Count < 5)
-                        AnsiConsole.MarkupLine("[red]Please define at least 5 colors to sort.[/]");
-
-                    ready = true;
-                    continue;
+                    AnsiConsole.MarkupLine("[red]Failed to find file from the defined path.[/]");
+                    return;
                 }
 
-                if (!IntegrityColor.TryParse(value, out var color))
+                var fileInfo = new FileInfo(Context.Parameters[0]);
+
+                if (fileInfo.Extension is not ".txt")
                 {
-                    AnsiConsole.MarkupLine("[red]Failed to parse input. Please retry with a valid value.[/]");
-                    continue;
+                    AnsiConsole.MarkupLine("[red]Please define a .txt file.[/]");
+                    return;
                 }
-                colors.Add(color);
+
+                var lines = await File.ReadAllLinesAsync(fileInfo.FullName);
+
+                foreach (var line in lines)
+                {
+                    if (IntegrityColor.TryParse(line, out var color))
+                        colors.Add(color);
+                }
+
+                if (!colors.Any())
+                {
+                    AnsiConsole.MarkupLine("[red]Unable to parse provided colors.[/]");
+                    return;
+                }
+
+                AnsiConsole.MarkupLine($"[grey]Added {colors.Count} colors from provided file.[/]");
+            }
+            else
+            {
+                bool ready = false;
+                while (!ready)
+                {
+                    var value = AnsiConsole.Prompt(new TextPrompt<string>("[grey]Please define a color to sort. (Leave empty to continue)[/]")
+                        .AllowEmpty());
+
+                    if (string.IsNullOrEmpty(value))
+                    {
+                        if (colors.Count < 2)
+                            AnsiConsole.MarkupLine("[red]Please define at least 2 colors to sort.[/]");
+
+                        ready = true;
+                        continue;
+                    }
+
+                    if (!IntegrityColor.TryParse(value, out var color))
+                    {
+                        AnsiConsole.MarkupLine("[red]Failed to parse input. Please retry with a valid value.[/]");
+                        continue;
+                    }
+                    colors.Add(color);
+                }
             }
 
             var sorted = colors.OrderByDescending(x => x, new ColorComparer());
 
             var table = new Table()
                 .Title("Sorted all provided colors:")
-                .Expand()
-                .AddColumn("1")
-                .AddColumn("2")
-                .AddColumn("3")
-                .AddColumn("4")
-                .AddColumn("5")
-                .RoundedBorder()
+                .AddColumn("chart")
                 .BorderColor(Color.Grey)
-                .HideHeaders();
+                .RoundedBorder();
 
-            int maxEntriesPerColumn = (colors.Count / 5);
-            for (int i = 0; i < maxEntriesPerColumn; i++)
+            var barChart = new BarChart()
+                .LeftAlignLabel()
+                .ShowValues(false);
+
+            for (int i = 0; i < colors.Count; i++)
             {
-                var markup1 = GetMarkup(colors, i);
-                var markup2 = GetMarkup(colors, i + maxEntriesPerColumn);
-                var markup3 = GetMarkup(colors, i + (maxEntriesPerColumn * 2));
-                var markup4 = GetMarkup(colors, i + (maxEntriesPerColumn * 3));
-                var markup5 = GetMarkup(colors, i + (maxEntriesPerColumn * 4));
-
-                table.AddRow(markup1, markup2, markup3, markup4, markup5);
+                barChart.AddItem(
+                    label: $"{colors[i].ToString(ColorType.RGB)} ({colors[i].ToString(ColorType.Hex)})", 
+                    value: 100, 
+                    color: colors[i].Color.ToSpectreColor());
             }
 
-            AnsiConsole.Write(table);
-        }
+            table.AddRow(barChart);
 
-        private static Markup GetMarkup(List<IntegrityColor> colors, int targetIndex)
-        {
-            if (colors.Count == targetIndex + 1)
+            AnsiConsole.Write(barChart);
+
+            if (AnsiConsole.Confirm("[grey]Do you want to save the reorganized colors?[/]"))
             {
-                var color1 = colors[targetIndex];
-                return new Markup($"{color1.Color.Name}", new Style(color1.Color.ToSpectreColor()));
+                var type = AnsiConsole.Prompt(new SelectionPrompt<ColorType>()
+                    .Title("[grey]What format do you want to save the colors in?[/]")
+                    .AddChoices(Enum.GetValues<ColorType>().Where(x => x is not ColorType.Name)));
+
+                string fileName = string.Empty;
+                if (fromFile)
+                    fileName = Context.Parameters[0];
+                else
+                    fileName = AnsiConsole.Prompt(new TextPrompt<string>("[grey]What file do you want to save the colors to?[/]"));
+
+                await File.WriteAllLinesAsync(fileName, colors.Select(x => x.ToString(type)));
+
+                AnsiConsole.MarkupLine("[grey]Wrote colors to file succesfully.[/]");
             }
             else
-                return new Markup($" ");
+                AnsiConsole.MarkupLine("[grey]Skipped saving sorted colors.[/]");
         }
     }
 }

@@ -12,7 +12,7 @@ namespace GradiGen.App.Commands
     [Command("format-save", "Saves all of the added custom formats to a file.")]
     [Aliases("fs", "formatsave", "saveformat", "sformat")]
     [Parameter("directory", "The file directory to save to.")]
-    [Parameter("name", "The file name if the file already exists.")]
+    [Parameter("name", "The file name if the file already exists.", false)]
     public class FormatSaverCommand : CommandBase<CommandContext>
     {
         public override async Task ExecuteAsync()

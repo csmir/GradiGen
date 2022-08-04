@@ -27,7 +27,7 @@ namespace GradiGen.App.Commands
                 .BorderColor(Spectre.Console.Color.Grey)
                 .HideHeaders();
 
-            int maxEntriesPerColumn = (colors.Count / 5);
+            int maxEntriesPerColumn = (int)Math.Ceiling(colors.Count / 5f);
             for (int i = 0; i < maxEntriesPerColumn; i++)
             {
                 var markup1 = GetMarkup(colors, i);
@@ -44,7 +44,7 @@ namespace GradiGen.App.Commands
 
         private static Markup GetMarkup(List<IntegrityColor> colors, int targetIndex)
         {
-            if (colors.Count == targetIndex + 1)
+            if (colors.Count > targetIndex + 1)
             {
                 var color1 = colors[targetIndex];
                 return new Markup($"{color1.Color.Name}", new Style(color1.Color.ToSpectreColor()));
