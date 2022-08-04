@@ -1,6 +1,4 @@
-﻿using GradiGen.Colors;
-
-namespace GradiGen
+﻿namespace GradiGen.Colors
 {
     /// <summary>
     ///     Represents a comparer for system colors in the RGB spectrum.

@@ -28,6 +28,8 @@ namespace GradiGen.App
         /// </summary>
         public static void Start()
         {
+            Console.Title = "GradiGen by Rozen";
+
             //AnsiConsole.Record();
             System = Environment.OSVersion.Platform switch
             {
