@@ -13,12 +13,9 @@
         /// <returns></returns>
         public int Compare(IntegrityColor x, IntegrityColor y)
         {
-            var xValue = x.CalculateIntegrity();
-            var yValue = y.CalculateIntegrity();
-
-            if (xValue > yValue)
+            if (x.Integrity > y.Integrity)
                 return 1;
-            if (xValue < yValue)
+            if (x.Integrity < y.Integrity)
                 return -1;
             return 0;
         }

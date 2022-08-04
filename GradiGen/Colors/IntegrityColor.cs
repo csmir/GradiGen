@@ -205,12 +205,5 @@ namespace GradiGen.Colors
                 }
             }
         }
-
-        /// <summary>
-        ///     Calculates the integrity value to sort the colors with.
-        /// </summary>
-        /// <returns></returns>
-        public double CalculateIntegrity()
-            => Hue + Luminosity + Value + Saturation;
     }
 }
