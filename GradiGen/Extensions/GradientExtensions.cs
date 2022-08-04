@@ -28,6 +28,7 @@ namespace GradiGen.Extensions
 
                 yield return Color.FromArgb(rAverage, gAverage, bAverage);
             }
+            yield return final;
         }
     }
 }

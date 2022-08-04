@@ -1,22 +1,49 @@
 ﻿using GradiGen.Colors;
 using GradiGen.Commands;
-using GradiGen.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Spectre.Console;
+using GradiGen.Extensions;
 
-namespace GradiGen.App.Commands
+namespace GradiGen.Application.Commands
 {
-    [Command("color-list", "Displays the full list of available console colors.")]
-    [Aliases("c-list", "colors", "clist")]
-    public class ColorsCommand : CommandBase<CommandContext>
+    [Command("sort", "Sorts a range of self-defined colors.")]
+    [Aliases("s")]
+    public class SortCommand : CommandBase<CommandContext>
     {
         public override async Task ExecuteAsync()
         {
-            await Task.CompletedTask;
+            bool ready = false;
+            List<IntegrityColor> colors = new();
+            while (!ready)
+            {
+                var value = AnsiConsole.Prompt(new TextPrompt<string>("[grey]Please define a color to sort. (Leave empty to continue)[/]")
+                    .AllowEmpty());
 
-            var colors = Spectrum.GetSortedSpectrum().Items;
+                if (string.IsNullOrEmpty(value))
+                {
+                    if (colors.Count < 5)
+                        AnsiConsole.MarkupLine("[red]Please define at least 5 colors to sort.[/]");
+
+                    ready = true;
+                    continue;
+                }
+
+                if (!IntegrityColor.TryParse(value, out var color))
+                {
+                    AnsiConsole.MarkupLine("[red]Failed to parse input. Please retry with a valid value.[/]");
+                    continue;
+                }
+                colors.Add(color);
+            }
+
+            var sorted = colors.OrderByDescending(x => x, new ColorComparer());
 
             var table = new Table()
-                .Title("All available colors:")
+                .Title("Sorted all provided colors:")
                 .Expand()
                 .AddColumn("1")
                 .AddColumn("2")
@@ -24,7 +51,7 @@ namespace GradiGen.App.Commands
                 .AddColumn("4")
                 .AddColumn("5")
                 .RoundedBorder()
-                .BorderColor(Spectre.Console.Color.Grey)
+                .BorderColor(Color.Grey)
                 .HideHeaders();
 
             int maxEntriesPerColumn = (colors.Count / 5);
