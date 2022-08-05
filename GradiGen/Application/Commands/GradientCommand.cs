@@ -45,17 +45,17 @@ namespace GradiGen.App.Commands
                     .PageSize(10)
                     .MoreChoicesText("[grey](Move up and down to reveal more options)[/]");
 
-                for (int i = 1; i < input.Length; i++)
+                for (int i = 1; i < input.Length + 1; i++) // Fixes density allowing each char to be assigned a color
                     stepsPrompt.AddChoice(i);
 
                 steps = AnsiConsole.Prompt<int>(stepsPrompt);
             }
             else
                 steps = AnsiConsole.Prompt<int>(new TextPrompt<int>("[grey]How dense do you want your gradient to be?[/]")
-                    .Validate(x => x is > 1 and < 100)
-                    .ValidationErrorMessage("[red]Please define a value between 2 and 100."));
+                    .Validate(x => x is > 1 and < int.MaxValue) // Fixes custom density to have any desired inputs
+                    .ValidationErrorMessage($"[red]Please define a value between 2 and {int.MaxValue}."));
 
-            var gradient = result.Item1.GenerateGradient(result.Item2, steps);
+            var gradient = result.Item1.GenerateGradient(result.Item2, steps - 1); // Fixes the output from producing an unwanted extra color
 
             var formatValues = Enum.GetValues<FormatType>();
 
