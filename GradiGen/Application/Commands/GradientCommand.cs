@@ -53,7 +53,7 @@ namespace GradiGen.App.Commands
             else
                 steps = AnsiConsole.Prompt<int>(new TextPrompt<int>("[grey]How dense do you want your gradient to be?[/]")
                     .Validate(x => x is > 1 and < int.MaxValue) // Fixes custom density to have any desired inputs
-                    .ValidationErrorMessage("[red]Please define a value between 2 and 100."));
+                    .ValidationErrorMessage($"[red]Please define a value between 2 and {int.MaxValue}."));
 
             var gradient = result.Item1.GenerateGradient(result.Item2, steps - 1); // Fixes the output from producing an unwanted extra color
 
