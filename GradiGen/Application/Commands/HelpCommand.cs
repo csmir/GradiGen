@@ -46,9 +46,9 @@ namespace GradiGen.App.Commands
                             new Markup(""));
 
                 var paramTable = new Table()
-                    .AddColumn("Name")
+                    .AddColumn("Name", c => c.Width(10).NoWrap())
                     .AddColumn("Required?")
-                    .AddColumn("Description")
+                    .AddColumn("Description", c => c.Width(25))
                     .SimpleBorder()
                     .Expand();
 

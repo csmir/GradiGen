@@ -63,7 +63,10 @@ namespace GradiGen.Application.Commands
                     if (string.IsNullOrEmpty(value))
                     {
                         if (colors.Count < 2)
+                        {
                             AnsiConsole.MarkupLine("[red]Please define at least 2 colors to sort.[/]");
+                            return;
+                        }
 
                         ready = true;
                         continue;
@@ -90,12 +93,12 @@ namespace GradiGen.Application.Commands
                 .LeftAlignLabel()
                 .ShowValues(false);
 
-            for (int i = 0; i < colors.Count; i++)
+            foreach (var color in sorted)
             {
                 barChart.AddItem(
-                    label: $"{colors[i].ToString(ColorType.RGB)} ({colors[i].ToString(ColorType.Hex)})", 
+                    label: $"{color.ToString(ColorType.RGB)} ({color.ToString(ColorType.Hex)})", 
                     value: 100, 
-                    color: colors[i].Color.ToSpectreColor());
+                    color: color.Color.ToSpectreColor());
             }
 
             table.AddRow(barChart);
@@ -114,7 +117,7 @@ namespace GradiGen.Application.Commands
                 else
                     fileName = AnsiConsole.Prompt(new TextPrompt<string>("[grey]What file do you want to save the colors to?[/]"));
 
-                await File.WriteAllLinesAsync(fileName, colors.Select(x => x.ToString(type)));
+                await File.WriteAllLinesAsync(fileName, sorted.Select(x => x.ToString(type)));
 
                 AnsiConsole.MarkupLine("[grey]Wrote colors to file succesfully.[/]");
             }
