@@ -15,7 +15,10 @@ namespace GradiGen.App.Commands
         public override async Task ExecuteAsync()
         {
             await Task.CompletedTask;
-            var type = AnsiConsole.Prompt(
+
+            Console.WriteLine(Context.Parameters.Count());
+
+            var type = Context.Parameters.Count >= 1 ? Enum.Parse<ColorType>(Context.Parameters[0], true) : AnsiConsole.Prompt(
                 new SelectionPrompt<ColorType>()
                     .PageSize(4)
                     .AddChoices(Enum.GetValues<ColorType>())
@@ -28,10 +31,11 @@ namespace GradiGen.App.Commands
                 ColorType.RGB => RGBGeneration(),
                 ColorType.Hex => HexGeneration(),
                 ColorType.UInt32 => UInt32Generation(),
+                ColorType.Random => NameGeneration(true),
                 _ => throw new NotImplementedException()
             };
 
-            var input = AnsiConsole.Prompt<string>(
+            var input = Context.Parameters.Count >= 2 ? Context.Parameters[1] : AnsiConsole.Prompt<string>(
                 new TextPrompt<string>("[grey]Formatting Text (Leave empty if none):[/]")
                     .Validate(x => x.Length is > 2 or 0)
                     .ValidationErrorMessage("[red]Input text needs to be 0 or more than 2 characters long.[/]")
@@ -45,10 +49,10 @@ namespace GradiGen.App.Commands
                     .PageSize(10)
                     .MoreChoicesText("[grey](Move up and down to reveal more options)[/]");
 
-                for (int i = 1; i < input.Length + 1; i++) // Fixes density allowing each char to be assigned a color
+                for (int i = input.Length; i >= 1; i--) // Fixes density allowing each char to be assigned a color
                     stepsPrompt.AddChoice(i);
 
-                steps = AnsiConsole.Prompt<int>(stepsPrompt);
+                steps = Context.Parameters.Count > 3 ? int.Parse(Context.Parameters[2]) : AnsiConsole.Prompt<int>(stepsPrompt);
             }
             else
                 steps = AnsiConsole.Prompt<int>(new TextPrompt<int>("[grey]How dense do you want your gradient to be?[/]")
@@ -92,6 +96,14 @@ namespace GradiGen.App.Commands
 
             if (Lifetime.System is SystemEnvironment.Windows)
             {
+                if (Context.Parameters.Count >= 3)
+                {
+                    if (Context.Parameters[2].ToLowerInvariant() == "y")
+                        Clipboard.SetText(string.Join("", formatted.Select(x => x.Value)));
+
+                    return;
+                }
+                    
                 if (AnsiConsole.Confirm("[grey]Do you want to copy your format to the system clipboard?[/]"))
                 {
                     Clipboard.SetText(string.Join("", formatted.Select(x => x.Value)));
@@ -208,9 +220,9 @@ namespace GradiGen.App.Commands
         #endregion
 
         #region named
-        private static (System.Drawing.Color, System.Drawing.Color) NameGeneration()
+        private static (System.Drawing.Color, System.Drawing.Color) NameGeneration(bool isRandom = false)
         {
-            var approach = AnsiConsole.Prompt(new SelectionPrompt<GenerationApproach>()
+            var approach = isRandom ? GenerationApproach.Randomized : AnsiConsole.Prompt(new SelectionPrompt<GenerationApproach>()
                 .Title("[grey]What generation approach do you want to use?[/]")
                 .AddChoices(Enum.GetValues<GenerationApproach>()));
 
